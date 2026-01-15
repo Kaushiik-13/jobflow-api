@@ -2,27 +2,13 @@ name: JobFlow CI
 
 on:
   push:
-    branches: [ "main","master"]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main","master" ]
+    branches: [ "main", "master" ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: jobflow_db
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     steps:
       - name: Checkout repository
@@ -39,23 +25,10 @@ jobs:
       - name: Build NestJS
         run: npm run build
 
-      - name: Build Docker image
-        run: docker build -t jobflow-api .
+      - name: Start containers with Docker Compose
+        run: docker compose up -d --build
 
-      - name: Run API container
-        run: |
-          docker run -d \
-            --name jobflow-api \
-            -p 3000:3000 \
-            -e DB_HOST=host.docker.internal \
-            -e DB_PORT=3306 \
-            -e DB_USERNAME=root \
-            -e DB_PASSWORD=root \
-            -e DB_NAME=jobflow_db \
-            -e JWT_SECRET=jobflow_secret \
-            jobflow-api
-
-      - name: Wait for health check
+      - name: Wait for API health
         run: |
           echo "Waiting for API health..."
           for i in {1..12}; do
@@ -66,5 +39,5 @@ jobs:
             sleep 5
           done
           echo "API failed health check"
-          docker logs jobflow-api
+          docker compose logs
           exit 1
