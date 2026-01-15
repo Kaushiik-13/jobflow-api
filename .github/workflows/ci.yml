@@ -11,33 +11,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
+      # 1️.Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
+      # 2️.Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # 3️⃣ Install dependencies
+      # 3️.Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Build NestJS (TypeScript → dist)
+      # 4️.Build NestJS (TypeScript → dist)
       - name: Build NestJS
         run: npm run build
 
-      # 5️⃣ Prepare environment file for Docker Compose
+      # 5️.Prepare environment file for Docker Compose
       - name: Prepare env file for CI
         run: cp .env.example .env
 
-      # 6️⃣ Start MySQL + API using Docker Compose
+      # 6️.Start MySQL + API using Docker Compose
       - name: Start containers with Docker Compose
         run: docker compose up -d --build
 
-      # 7️⃣ Wait for API health endpoint
+      # 7️.Wait for API health endpoint
       - name: Wait for API health
         run: |
           echo "Waiting for API health..."
