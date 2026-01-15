@@ -20,6 +20,7 @@ export class HealthController {
     // 2️⃣ Database health
     let dbStatus: 'up' | 'down' = 'up';
 
+    
     try {
       await this.dataSource.query('SELECT 1');
     } catch (error) {
