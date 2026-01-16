@@ -32,12 +32,18 @@ jobs:
       # 5️.Prepare environment file for Docker Compose
       - name: Prepare env file for CI
         run: cp .env.example .env
+      
+      # 6.Inject secrets securely
+      - name: Inject secrets
+        run: |
+          echo: "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
-      # 6️.Start MySQL + API using Docker Compose
+      # 7.Start MySQL + API using Docker Compose
       - name: Start containers with Docker Compose
         run: docker compose up -d --build
 
-      # 7️.Wait for API health endpoint
+      # 8.Wait for API health endpoint
       - name: Wait for API health
         run: |
           echo "Waiting for API health..."
