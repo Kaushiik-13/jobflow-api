@@ -36,7 +36,7 @@ jobs:
       # 6.Inject secrets securely
       - name: Inject secrets
         run: |
-          echo: "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
       # 7.Start MySQL + API using Docker Compose
