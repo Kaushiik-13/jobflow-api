@@ -29,15 +29,18 @@ jobs:
       - name: Build NestJS
         run: npm run build
 
-      # 5️.Prepare environment file for Docker Compose
+      # 5️⃣ & 6️⃣ Prepare environment file with secrets
       - name: Prepare env file for CI
-        run: cp .env.example .env
-
-      # 6.Inject secrets securely
-      - name: Inject secrets
         run: |
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/' .env
-          sed -i 's/JWT_SECRET=.*/JWT_SECRET=${{ secrets.JWT_SECRET }}/' .env
+          cat > .env << EOF
+          DB_HOST=mysql
+          DB_PORT=3306
+          DB_USERNAME=root
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=jobflow_db
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN=1h
+          EOF
 
       # 7.Start MySQL + API using Docker Compose
       - name: Start containers with Docker Compose
