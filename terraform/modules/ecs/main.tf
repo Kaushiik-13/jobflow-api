@@ -39,7 +39,8 @@ resource "aws_ecs_task_definition" "main" {
         { name = "DB_USERNAME", value = var.db_username },
         { name = "DB_PASSWORD", value = var.db_password },
         { name = "JWT_SECRET", value = var.jwt_secret },
-        { name = "JWT_EXPIRES_IN", value = "3600" }
+        { name = "JWT_EXPIRES_IN", value = "3600" },
+        { name = "NODE_ENV", value = "production" }
       ]
       logConfiguration = {
         logDriver = "awslogs"

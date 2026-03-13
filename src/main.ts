@@ -9,16 +9,20 @@ async function bootstrap() {
   // Global validation (important)
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
-  // Swagger configuration
-  const config = new DocumentBuilder()
-    .setTitle('JobFlow API')
-    .setDescription('Secure Job Tracking API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
+  // Swagger configuration (only in non-production)
+  const isProduction = process.env.NODE_ENV === 'production';
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  if (!isProduction) {
+    const config = new DocumentBuilder()
+      .setTitle('JobFlow API')
+      .setDescription('Job Tracking API - Development')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   await app.listen(3000);
 }
