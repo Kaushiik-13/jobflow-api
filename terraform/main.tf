@@ -47,7 +47,7 @@ module "ecs" {
   vpc_id                = module.vpc.vpc_id
   private_subnet_ids    = module.vpc.private_subnet_ids
   ecr_repository_url    = module.ecr.repository_url
-  db_host               = module.rds.db_endpoint
+  db_host               = module.rds.db_host
   db_name               = var.db_name
   db_username           = var.db_username
   db_password           = var.db_password

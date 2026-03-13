@@ -65,7 +65,7 @@ resource "aws_lb_target_group" "main" {
     interval            = 30
     port                = 3000
     protocol            = "HTTP"
-    path                = "/"
+    path                = "/health"
     matcher             = "200-399"
   }
 

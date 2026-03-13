@@ -3,6 +3,11 @@ output "db_endpoint" {
   sensitive = true
 }
 
+output "db_host" {
+  value     = aws_db_instance.main.address
+  sensitive = true
+}
+
 output "db_name" {
   value = var.db_name
 }
