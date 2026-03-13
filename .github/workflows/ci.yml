@@ -41,6 +41,8 @@ jobs:
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           JWT_EXPIRES_IN=1h
           EOF
+          echo "DB_PASSWORD set: ${{ secrets.DB_PASSWORD != '' }}"
+          echo "JWT_SECRET set: ${{ secrets.JWT_SECRET != '' }}"
 
       # 7.Start MySQL + API using Docker Compose
       - name: Start containers with Docker Compose
