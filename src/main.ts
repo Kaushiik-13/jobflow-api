@@ -9,20 +9,18 @@ async function bootstrap() {
   // Global validation (important)
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
-  // Swagger configuration (only in non-production)
-  const isProduction = process.env.NODE_ENV === 'production';
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('JobFlow API')
+    .setDescription(
+      'JobFlow - Production Ready Backend API with JWT Authentication',
+    )
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
 
-  if (!isProduction) {
-    const config = new DocumentBuilder()
-      .setTitle('JobFlow API')
-      .setDescription('Job Tracking API - Development')
-      .setVersion('1.0')
-      .addBearerAuth()
-      .build();
-
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
-  }
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(3000);
 }

@@ -8,8 +8,6 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-ENV NODE_ENV=production
-
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
