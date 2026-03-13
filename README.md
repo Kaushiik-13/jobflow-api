@@ -5,131 +5,145 @@
 <h1 align="center">JobFlow API</h1>
 
 <p align="center">
-  A production-ready NestJS backend API deployed on AWS ECS Fargate with MySQL database.
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Status-Production-green" alt="Status" />
-  <img src="https://img.shields.io/badge/AWS-ap--south--1-orange" alt="AWS Region" />
-  <img src="https://img.shields.io/badge/NestJS-11.x-red" alt="NestJS Version" />
-  <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
+  Production-Ready Backend with CI/CD on AWS
 </p>
 
 ---
 
-## 📋 Description
+## About
 
-JobFlow is a production-ready REST API built with NestJS for job management. It provides user authentication, user management, and job posting/management features.
+JobFlow is a production-ready NestJS REST API with TypeORM + MySQL, implementing JWT-based RBAC for secure job creation and status management. Containerized using Docker and automated build/test/deploy with GitHub Actions CI/CD. Provisioned and deployed on AWS ECS (Fargate) using Terraform (IaC) with ALB, VPC, RDS, and IAM, following least-privilege access.
 
-### Features
+---
 
-- **User Authentication** - JWT-based authentication with login/register
-- **User Management** - CRUD operations for users (admin/user roles)
+## Tech Stack
+
+| Category           | Technology                                 |
+| ------------------ | ------------------------------------------ |
+| **Backend**        | NestJS, TypeScript, TypeORM                |
+| **Database**       | MySQL (AWS RDS)                            |
+| **Authentication** | JWT, Passport, RBAC                        |
+| **Container**      | Docker                                     |
+| **Cloud**          | AWS (ECS Fargate, RDS, ALB, ECR, VPC, IAM) |
+| **IaC**            | Terraform                                  |
+| **CI/CD**          | GitHub Actions                             |
+
+---
+
+## Features
+
+- **User Authentication** - JWT-based login/register
+- **Role-Based Access Control** - Admin and User roles
 - **Job Management** - Create, read, update, delete job postings
-- **Health Monitoring** - Health check endpoint for deployment monitoring
+- **Health Monitoring** - Health check endpoint
 
 ---
 
-## 🏗️ Architecture
-
-### AWS Infrastructure
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
-│                         AWS Production-Ready Backend Architecture                   │
+│                              AWS Cloud (ap-south-1 - Mumbai)                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
-// Entry point: User/Client
-User Client
+                              ┌─────────────────┐
+                              │   User / Client  │
+                              └────────┬────────┘
+                                       │
+                                       ▼
+                              ┌─────────────────┐
+                              │   Route 53      │
+                              └────────┬────────┘
+                                       │
+                                       ▼
+                         ┌─────────────────────────┐
+                         │  Application Load      │
+                         │  Balancer (Port 80)     │
+                         └───────────┬─────────────┘
+                                     │
+                                     ▼
+                         ┌─────────────────────────┐
+                         │   Target Group          │
+                         │   (Port 3000)           │
+                         │   Health: /health       │
+                         └───────────┬─────────────┘
+                                     │
+                                     ▼
+                         ┌─────────────────────────┐
+                         │  ECS Fargate Cluster    │
+                         │  ┌───────────────────┐  │
+                         │  │  NestJS Container │  │
+                         │  │  (2 Tasks)        │  │
+                         │  │  Port: 3000       │  │
+                         │  └───────────────────┘  │
+                         └───────────┬─────────────┘
+                                     │
+                                     ▼
+                         ┌─────────────────────────┐
+                         │  RDS MySQL              │
+                         │  (Private Subnet)       │
+                         │  Port: 3306             │
+                         └─────────────────────────┘
 
-// DNS Routing
-Route 53
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           CI/CD Pipeline (GitHub Actions)                          │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 
-// VPC boundary
-VPC (ap-south-1 - Mumbai) {
-
-  // Public Subnets (2 AZs)
-  Public Subnets (ap-south-1a, ap-south-1b) {
-    ALB: jobflow-alb-production-1484565429 (Port 80/HTTP)
-  }
-
-  // Private Subnets (2 AZs)
-  Private Subnets (10.0.10.0/24, 10.0.20.0/24) {
-
-    // ECS Fargate
-    ECS Fargate Cluster: jobflow-cluster-production
-    └── NestJS Container: jobflow-api:latest (Port 3000)
-        └── 2 Tasks Running
-
-    // RDS MySQL
-    RDS MySQL: jobflow-mysql-production
-        └── db.t3.micro
-        └── Port: 3306
-  }
-}
-
-// External Services
-ECR: jobflow-api (Docker image storage)
-
-// CI/CD Pipeline
-GitHub Actions (Auto-deploy on push)
+  Git Push → CI (Build/Test) → CD (Push to ECR) → ECS (Deploy)
 ```
 
-### Security Boundaries
+---
 
-| Component | Security                                   |
-| --------- | ------------------------------------------ |
-| ALB       | Internet-facing, Port 80 open to 0.0.0.0/0 |
-| ALB → ECS | Port 3000, via Security Groups             |
-| ECS → RDS | Port 3306, ECS SG → RDS SG                 |
-| RDS       | Private subnet, No public access           |
-| ECS Tasks | No public IP, Private subnets only         |
+## Live Deployment
+
+| Resource    | Details                                                                      |
+| ----------- | ---------------------------------------------------------------------------- |
+| **API URL** | http://jobflow-alb-production-1484565429.ap-south-1.elb.amazonaws.com        |
+| **Health**  | http://jobflow-alb-production-1484565429.ap-south-1.elb.amazonaws.com/health |
+| **Region**  | ap-south-1 (Mumbai, India)                                                   |
+| **Status**  | ✅ Production                                                                |
 
 ---
 
-## 🛠️ Tech Stack
+## AWS Resources
 
-| Layer              | Technology                       |
-| ------------------ | -------------------------------- |
-| **Framework**      | NestJS 11.x                      |
-| **Language**       | TypeScript                       |
-| **Database**       | MySQL 8.0 (AWS RDS)              |
-| **ORM**            | TypeORM                          |
-| **Authentication** | JWT (Passport)                   |
-| **Container**      | Docker                           |
-| **Cloud**          | AWS (ECS Fargate, RDS, ALB, ECR) |
-| **CI/CD**          | GitHub Actions                   |
-| **Infrastructure** | Terraform                        |
+| Service         | Name                       | Details             |
+| --------------- | -------------------------- | ------------------- |
+| **VPC**         | jobflow-vpc-production     | 10.0.0.0/16         |
+| **ECS Cluster** | jobflow-cluster-production | Fargate             |
+| **ECS Service** | jobflow-service-production | 2 tasks             |
+| **ALB**         | jobflow-alb-production     | Port 80             |
+| **RDS**         | jobflow-mysql-production   | MySQL 8.0, t3.micro |
+| **ECR**         | jobflow-api                | Docker registry     |
 
 ---
 
-## 🚀 Live Deployment
+## Security
 
-| Resource            | URL/Value                                                                    |
-| ------------------- | ---------------------------------------------------------------------------- |
-| **API URL**         | http://jobflow-alb-production-1484565429.ap-south-1.elb.amazonaws.com        |
-| **Health Endpoint** | http://jobflow-alb-production-1484565429.ap-south-1.elb.amazonaws.com/health |
-| **Region**          | ap-south-1 (Mumbai, India)                                                   |
-| **ECS Tasks**       | 2 (Fargate)                                                                  |
+| Layer             | Implementation                              |
+| ----------------- | ------------------------------------------- |
+| **Network**       | VPC with public/private subnets             |
+| **Load Balancer** | ALB with security groups                    |
+| **Compute**       | ECS tasks in private subnets (no public IP) |
+| **Database**      | RDS in private subnets, no public access    |
+| **Access**        | IAM roles with least-privilege              |
+| **Auth**          | JWT-based authentication with RBAC          |
 
 ---
 
-## 📦 Project Setup
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
 - MySQL (local development)
-- Docker (for containerization)
+- Docker
 
 ### Installation
 
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/Kaushiik-13/jobflow-api.git
-
-# Navigate to project directory
 cd jobflow-api
 
 # Install dependencies
@@ -138,64 +152,35 @@ npm install
 
 ### Environment Variables
 
-Create a `.env` file in the root directory:
-
 ```env
-# Database
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=your_password
 DB_NAME=jobflow_db
-
-# JWT
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=3600
 ```
 
-### Run the Project
+### Run Locally
 
 ```bash
-# Development mode (with hot reload)
+# Development
 npm run start:dev
 
-# Production mode
+# Production
 npm run start:prod
 
-# Build the project
+# Build
 npm run build
-```
 
----
-
-## ✅ Available Scripts
-
-```bash
-# Run in development mode
-npm run start
-
-# Run in watch mode (hot reload)
-npm run start:dev
-
-# Run in production mode
-npm run start:prod
-
-# Run tests
+# Test
 npm run test
-
-# Run tests with coverage
-npm run test:cov
-
-# Lint code
-npm run lint
-
-# Format code
-npm run format
 ```
 
 ---
 
-## 📚 API Endpoints
+## API Endpoints
 
 ### Authentication
 
@@ -206,69 +191,31 @@ npm run format
 
 ### Users
 
-| Method | Endpoint   | Description                |
-| ------ | ---------- | -------------------------- |
-| GET    | /users     | Get all users (protected)  |
-| GET    | /users/:id | Get user by ID (protected) |
-| PATCH  | /users/:id | Update user (protected)    |
-| DELETE | /users/:id | Delete user (protected)    |
+| Method | Endpoint   | Description    |
+| ------ | ---------- | -------------- |
+| GET    | /users     | Get all users  |
+| GET    | /users/:id | Get user by ID |
+| PATCH  | /users/:id | Update user    |
+| DELETE | /users/:id | Delete user    |
 
 ### Jobs
 
-| Method | Endpoint  | Description                |
-| ------ | --------- | -------------------------- |
-| GET    | /jobs     | Get all jobs (public)      |
-| GET    | /jobs/:id | Get job by ID (public)     |
-| POST   | /jobs     | Create new job (protected) |
-| PATCH  | /jobs/:id | Update job (protected)     |
-| DELETE | /jobs/:id | Delete job (protected)     |
+| Method | Endpoint  | Description   |
+| ------ | --------- | ------------- |
+| GET    | /jobs     | Get all jobs  |
+| GET    | /jobs/:id | Get job by ID |
+| POST   | /jobs     | Create job    |
+| PATCH  | /jobs/:id | Update job    |
+| DELETE | /jobs/:id | Delete job    |
 
 ### Health
 
-| Method | Endpoint | Description           |
-| ------ | -------- | --------------------- |
-| GET    | /health  | Health check (public) |
+| Method | Endpoint | Description  |
+| ------ | -------- | ------------ |
+| GET    | /health  | Health check |
 
 ---
 
-## 🔄 CI/CD Pipeline
+## License
 
-The project uses GitHub Actions for continuous integration and deployment.
-
-### Workflows
-
-1. **CI (ci.yml)** - Runs on every push to main branch
-   - Install dependencies
-   - Lint code
-   - Build project
-   - Run tests
-
-2. **CD (cd.yml)** - Runs after CI succeeds
-   - Build Docker image
-   - Push to AWS ECR
-   - Deploy to ECS Fargate
-
-3. **Terraform (terraform.yml)** - For infrastructure changes
-   - Initialize Terraform
-   - Plan changes
-   - Apply infrastructure
-
----
-
-## ☁️ AWS Resources
-
-| Resource     | Name                       | Details             |
-| ------------ | -------------------------- | ------------------- |
-| VPC          | jobflow-vpc-production     | 10.0.0.0/16         |
-| ECS Cluster  | jobflow-cluster-production | Fargate             |
-| ECS Service  | jobflow-service-production | 2 tasks             |
-| ALB          | jobflow-alb-production     | Port 80             |
-| Target Group | jobflow-tg-production-v5   | Port 3000           |
-| RDS          | jobflow-mysql-production   | MySQL 8.0, t3.micro |
-| ECR          | jobflow-api                | Docker registry     |
-
----
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
+MIT License
