@@ -2,9 +2,9 @@ name: JobFlow CI
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ['main', 'master']
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ['main', 'master']
 
 jobs:
   build-and-test:
@@ -32,12 +32,12 @@ jobs:
       # 5️.Prepare environment file for Docker Compose
       - name: Prepare env file for CI
         run: cp .env.example .env
-      
+
       # 6.Inject secrets securely
       - name: Inject secrets
         run: |
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/' .env
+          sed -i 's/JWT_SECRET=.*/JWT_SECRET=${{ secrets.JWT_SECRET }}/' .env
 
       # 7.Start MySQL + API using Docker Compose
       - name: Start containers with Docker Compose
