@@ -23,3 +23,10 @@ docker-compose.yml
 
 # Env files (optional - see note below)
 .env
+
+# Terraform
+terraform/
+*.tf
+*.tfvars
+*.tfstate
+*.tfstate.backup
