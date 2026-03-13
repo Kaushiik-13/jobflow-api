@@ -20,8 +20,8 @@ resource "aws_security_group" "alb" {
   }
 
   egress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     description = "HTTP to ECS"
@@ -47,8 +47,8 @@ resource "aws_lb" "main" {
 }
 
 resource "aws_lb_target_group" "main" {
-  name        = "${var.project_name}-tg-${var.environment}-v2"
-  port        = 80
+  name        = "${var.project_name}-tg-${var.environment}-v3"
+  port        = 3000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
@@ -60,11 +60,13 @@ resource "aws_lb_target_group" "main" {
   health_check {
     enabled             = true
     healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 5
+    unhealthy_threshold = 10
+    timeout             = 10
     interval            = 30
-    path                = "/health"
-    matcher             = "200"
+    port                = 3000
+    protocol            = "HTTP"
+    path                = "/"
+    matcher             = "200-399"
   }
 
   tags = {

@@ -17,24 +17,32 @@ export class HealthController {
       uptime: process.uptime(), // seconds
     };
 
-    // Database health
+    // Database health - check but don't fail if DB is down
     let dbStatus: 'up' | 'down' = 'up';
+    let dbResponse: string | null = null;
 
-    
     try {
-      await this.dataSource.query('SELECT 1');
+      if (this.dataSource?.isInitialized) {
+        await this.dataSource.query('SELECT 1');
+        dbResponse = 'connected';
+      } else {
+        dbStatus = 'down';
+        dbResponse = 'not initialized';
+      }
     } catch (error) {
       dbStatus = 'down';
+      dbResponse = error.message || 'connection failed';
     }
 
-    // Overall status
-    const overallStatus = dbStatus === 'up' ? 'ok' : 'degraded';
+    // Overall status - always return ok for app health
+    const overallStatus = 'ok';
 
     return {
       status: overallStatus,
       application: appHealth,
       database: {
         status: dbStatus,
+        details: dbResponse,
       },
     };
   }

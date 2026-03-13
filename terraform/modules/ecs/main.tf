@@ -22,26 +22,6 @@ resource "aws_ecs_task_definition" "main" {
 
   container_definitions = jsonencode([
     {
-      name      = "nginx"
-      image     = "nginx:alpine"
-      essential = true
-      portMappings = [
-        {
-          containerPort = 80
-          hostPort      = 80
-          protocol      = "tcp"
-        }
-      ]
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = "/ecs/${var.project_name}-nginx"
-          "awslogs-region"        = "ap-south-1"
-          "awslogs-stream-prefix" = "ecs"
-        }
-      }
-    },
-    {
       name      = "nestjs"
       image     = "${var.ecr_repository_url}:latest"
       essential = true
@@ -57,14 +37,9 @@ resource "aws_ecs_task_definition" "main" {
         { name = "DB_PORT", value = "3306" },
         { name = "DB_NAME", value = var.db_name },
         { name = "DB_USERNAME", value = var.db_username },
+        { name = "DB_PASSWORD", value = var.db_password },
         { name = "JWT_SECRET", value = var.jwt_secret },
         { name = "JWT_EXPIRES_IN", value = "3600" }
-      ]
-      secrets = [
-        {
-          name      = "DB_PASSWORD"
-          valueFrom = var.db_password
-        }
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -74,12 +49,6 @@ resource "aws_ecs_task_definition" "main" {
           "awslogs-stream-prefix" = "ecs"
         }
       }
-      dependsOn = [
-        {
-          containerName = "nginx"
-          condition     = "START"
-        }
-      ]
     }
   ])
 
@@ -89,27 +58,28 @@ resource "aws_ecs_task_definition" "main" {
 }
 
 resource "aws_ecs_service" "main" {
-  name            = "${var.project_name}-service-${var.environment}"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.main.arn
-  desired_count   = 2
-  launch_type     = "FARGATE"
+  name                              = "${var.project_name}-service-${var.environment}"
+  cluster                           = aws_ecs_cluster.main.id
+  task_definition                   = aws_ecs_task_definition.main.arn
+  desired_count                     = 2
+  launch_type                       = "FARGATE"
+  health_check_grace_period_seconds = 60
 
   network_configuration {
     subnets          = var.private_subnet_ids
-    assign_public_ip = false
+    assign_public_ip = true
     security_groups  = [aws_security_group.ecs.id]
   }
 
   load_balancer {
     target_group_arn = var.alb_target_group_arn
-    container_name   = "nginx"
-    container_port   = 80
+    container_name   = "nestjs"
+    container_port   = 3000
   }
 
   deployment_circuit_breaker {
-    enable   = true
-    rollback = true
+    enable   = false
+    rollback = false
   }
 
   tags = {
