@@ -22,29 +22,9 @@ resource "aws_ecs_task_definition" "main" {
 
   container_definitions = jsonencode([
     {
-      name      = "nginx"
-      image     = "${var.ecr_repository_url}:nginx-latest"
-      essential = true
-      portMappings = [
-        {
-          containerPort = 80
-          hostPort      = 80
-          protocol      = "tcp"
-        }
-      ]
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = "/ecs/${var.project_name}-nginx"
-          "awslogs-region"        = "ap-south-1"
-          "awslogs-stream-prefix" = "ecs"
-        }
-      }
-    },
-    {
       name      = "nestjs"
       image     = "${var.ecr_repository_url}:latest"
-      essential = false
+      essential = true
       portMappings = [
         {
           containerPort = 3000
@@ -69,12 +49,6 @@ resource "aws_ecs_task_definition" "main" {
           "awslogs-stream-prefix" = "ecs"
         }
       }
-      dependsOn = [
-        {
-          containerName = "nginx"
-          condition     = "START"
-        }
-      ]
     }
   ])
 
@@ -99,8 +73,8 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = var.alb_target_group_arn
-    container_name   = "nginx"
-    container_port   = 80
+    container_name   = "nestjs"
+    container_port   = 3000
   }
 
   deployment_circuit_breaker {
@@ -119,19 +93,11 @@ resource "aws_security_group" "ecs" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
-    description     = "HTTP from ALB"
-  }
-
-  ingress {
     from_port       = 3000
     to_port         = 3000
     protocol        = "tcp"
     security_groups = [var.alb_security_group_id]
-    description     = "HTTP from ALB to NestJS"
+    description     = "HTTP from ALB"
   }
 
   egress {
@@ -183,11 +149,6 @@ resource "aws_iam_role" "ecs_task_role" {
       }
     ]
   })
-}
-
-resource "aws_cloudwatch_log_group" "nginx" {
-  name              = "/ecs/${var.project_name}-nginx"
-  retention_in_days = 7
 }
 
 resource "aws_cloudwatch_log_group" "nestjs" {
