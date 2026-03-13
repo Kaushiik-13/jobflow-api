@@ -36,14 +36,6 @@ jobs:
           docker push $ECR_REGISTRY/jobflow-api:$IMAGE_TAG
           docker push $ECR_REGISTRY/jobflow-api:latest
 
-      - name: Build and push Nginx image
-        env:
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        run: |
-          docker build -t $ECR_REGISTRY/jobflow-api:nginx-latest -f Dockerfile.nginx .
-          docker tag $ECR_REGISTRY/jobflow-api:nginx-latest $ECR_REGISTRY/jobflow-api:nginx-latest
-          docker push $ECR_REGISTRY/jobflow-api:nginx-latest
-
       - name: Deploy to ECS
         env:
           ECS_CLUSTER: jobflow-cluster-production
