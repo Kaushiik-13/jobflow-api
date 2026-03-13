@@ -98,7 +98,7 @@ JobFlow is a production-ready NestJS REST API with TypeORM + MySQL, implementing
 
 | Resource    | Details                                                                      |
 | ----------- | ---------------------------------------------------------------------------- |
-| **API URL** | http://jobflow-alb-production-1484565429.ap-south-1.elb.amazonaws.com        |
+| **API URL** | http://jobflow-alb-production-1484565429.ap-south-1.elb.amazonaws.com/api/docs |
 | **Health**  | http://jobflow-alb-production-1484565429.ap-south-1.elb.amazonaws.com/health |
 | **Region**  | ap-south-1 (Mumbai, India)                                                   |
 | **Status**  | ✅ Production                                                                |
