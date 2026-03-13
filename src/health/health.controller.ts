@@ -11,13 +11,13 @@ export class HealthController {
   @Public()
   @Get()
   async checkHealth() {
-    // 1️⃣ Application health
+    // Application health
     const appHealth = {
       status: 'up',
       uptime: process.uptime(), // seconds
     };
 
-    // 2️⃣ Database health
+    // Database health
     let dbStatus: 'up' | 'down' = 'up';
 
     
@@ -27,7 +27,7 @@ export class HealthController {
       dbStatus = 'down';
     }
 
-    // 3️⃣ Overall status
+    // Overall status
     const overallStatus = dbStatus === 'up' ? 'ok' : 'degraded';
 
     return {
