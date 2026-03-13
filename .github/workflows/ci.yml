@@ -41,14 +41,17 @@ jobs:
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           JWT_EXPIRES_IN=1h
           EOF
-          echo "DB_PASSWORD set: ${{ secrets.DB_PASSWORD != '' }}"
-          echo "JWT_SECRET set: ${{ secrets.JWT_SECRET != '' }}"
 
-      # 7.Start MySQL + API using Docker Compose
+      # 7️⃣ Update docker-compose with correct MySQL password
+      - name: Update docker-compose MySQL password
+        run: |
+          sed -i 's/MYSQL_ROOT_PASSWORD: 1234/MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}/' docker-compose.yaml
+
+      # 8.Start MySQL + API using Docker Compose
       - name: Start containers with Docker Compose
         run: docker compose up -d --build
 
-      # 8.Wait for API health endpoint
+      # 9.Wait for API health endpoint
       - name: Wait for API health
         run: |
           echo "Waiting for API health..."
